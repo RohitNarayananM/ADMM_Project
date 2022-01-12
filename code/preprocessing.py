@@ -3,6 +3,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score
 import pandas as pd
+import numpy as np
 
 
 heart_df = pd.read_csv('../datasets/heart.csv')
@@ -32,6 +33,15 @@ student_X_train = student_train.drop(["writing score"], axis=1)
 student_Y_train = student_train["writing score"]
 student_X_test = student_test.drop(["writing score"], axis=1)
 student_Y_test = student_test["writing score"]
+
+heart_X_train = np.array(heart_X_train)
+heart_Y_train = np.array(heart_Y_train)
+heart_X_test = np.array(heart_X_test)
+heart_Y_test = np.array(heart_Y_test)
+student_X_train = np.array(student_X_train)
+student_Y_train = np.array(student_Y_train)
+student_X_test = np.array(student_X_test)
+student_Y_test = np.array(student_Y_test)
 
 if __name__=="__main__":
     print(student_X_train.shape, student_Y_train.shape,

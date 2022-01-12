@@ -69,15 +69,11 @@ class Lasso:
 
 Lasso = Lasso()
 
-heart_X_train=np.array(heart_X_train)
-heart_Y_train=np.array(heart_Y_train)
 print(heart_X_train.shape,heart_Y_train.shape,heart_X_test.shape,heart_Y_test.shape)
 Lasso.fit(heart_X_train, heart_Y_train)
 Lasso.predict(heart_X_test,heart_Y_test)
 Lasso.coef_values()
 
-student_X_train=np.array(student_X_train)
-student_Y_train=np.array(student_Y_train)
 print(student_X_train.shape,student_Y_train.shape,student_X_test.shape,student_Y_test.shape)
 Lasso.fit(student_X_train, student_Y_train)
 Lasso.predict(student_X_test,student_Y_test)
