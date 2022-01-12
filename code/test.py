@@ -9,9 +9,10 @@ num_iterations = 20
 A = heart_X_train
 b = heart_Y_train
 b=b.reshape(b.shape[0],1)
+print('Heart Disease prediction')
 print(A.shape, b.shape)
 
-admm = Lasso(A, b,False)
+admm = Lasso(A, b,True)
 print(admm.LassoObjective())
 
 for i in range(0, num_iterations):
@@ -22,9 +23,10 @@ admm.predict(heart_X_test,heart_Y_test)
 A=student_X_train
 b=student_Y_train
 b=b.reshape(b.shape[0],1)
+print('Student performance prediction')
 print(A.shape, b.shape)
 
-admm = Lasso(A, b,False)
+admm = Lasso(A, b,True)
 print(admm.LassoObjective())
 for i in range(0, num_iterations):
     admm.step()

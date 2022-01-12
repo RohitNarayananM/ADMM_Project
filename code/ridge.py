@@ -53,18 +53,20 @@ class Ridge:
         plt.show()
 
 
-Ridge = Ridge(75)
+Ridge = Ridge()
 
 heart_X_train = np.array(heart_X_train)
 heart_Y_train = np.array(heart_Y_train)
+print('Heart Disease prediction')
 print(heart_X_train.shape, heart_Y_train.shape, heart_X_test.shape,heart_Y_test.shape)
 Ridge.fit(heart_X_train, heart_Y_train)
 Ridge.predict(heart_X_test,heart_Y_test)
-Ridge.coef_values()
+# Ridge.coef_values()
 
 student_X_train = np.array(student_X_test)
 student_Y_train = np.array(student_Y_test)
+print('Student performance prediction')
 print(student_X_train.shape, student_Y_train.shape, student_X_test.shape,student_Y_test.shape)
 Ridge.fit(student_X_train, student_Y_train)
 Ridge.predict(student_X_test,student_Y_test)
-Ridge.coef_values()
+# Ridge.coef_values()
