@@ -4,6 +4,7 @@ from numpy.linalg import norm
 from joblib import Parallel, delayed
 from multiprocessing import Process, Manager, cpu_count, Pool
 from sklearn.metrics import r2_score,mean_absolute_error,mean_squared_error
+from preprocessing import heart_X_test, heart_X_train, heart_Y_test, heart_Y_train, student_X_test, student_X_train, student_Y_test, student_Y_train
 
 
 class SolveIndividual:
