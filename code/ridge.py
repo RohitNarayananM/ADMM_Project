@@ -50,9 +50,6 @@ class Ridge:
         plt.title('Coefficient Values Sorted')
         if save_name:
             plt.savefig(f'fig/{save_name}.png', dpi=300)
-<<<<<<< HEAD
-        plt.show()
-=======
         plt.show()
 
 
@@ -73,4 +70,3 @@ print(student_X_train.shape, student_Y_train.shape, student_X_test.shape,student
 Ridge.fit(student_X_train, student_Y_train)
 Ridge.predict(student_X_test,student_Y_test)
 # Ridge.coef_values()
->>>>>>> 4947c8d4392f823ebfcd971852e5c9730d34a56b

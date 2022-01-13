@@ -65,10 +65,6 @@ class Lasso:
         if save_name:
             plt.savefig(f'fig/{save_name}.png',dpi=300)
         plt.show()
-<<<<<<< HEAD
-=======
-
-
 Lasso = Lasso()
 
 print('Heart Disease prediction')
@@ -82,4 +78,3 @@ print(student_X_train.shape,student_Y_train.shape,student_X_test.shape,student_Y
 Lasso.fit(student_X_train, student_Y_train)
 Lasso.predict(student_X_test,student_Y_test)
 # Lasso.coef_values()
->>>>>>> 4947c8d4392f823ebfcd971852e5c9730d34a56b
