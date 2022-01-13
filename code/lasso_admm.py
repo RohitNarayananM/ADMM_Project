@@ -4,12 +4,11 @@ from numpy.linalg import norm
 from joblib import Parallel, delayed
 from multiprocessing import Process, Manager, cpu_count, Pool
 from sklearn.metrics import r2_score,mean_absolute_error,mean_squared_error
-from preprocessing import heart_X_test, heart_X_train, heart_Y_test, heart_Y_train, student_X_test, student_X_train, student_Y_test, student_Y_train
 
 
 class SolveIndividual:
     def solve(self, A, b, nu, rho, Z):
-        t1 = A.dot(A.T)
+        t1 = A.T.dot(A)
         A = A.reshape(-1, 1)
         tX = (A * b + rho * Z - nu) / (t1 + rho)
         return tX
@@ -40,15 +39,14 @@ class Lasso:
         self.numberOfThreads = cpu_count()
 
     def step(self):
-        if self.parallel:
-            return self.step_parallel()
+        # if self.parallel:
+        #     return self.step_iterative()
 
         # Solve for X_t+1
         self.X = inv(self.A.T.dot(self.A) + self.rho).dot(self.A.T.dot(self.b) + self.rho * self.Z - self.nu)
 
         # Solve for Z_t+1
-        self.Z = self.X + self.nu / self.rho - \
-            (self.alpha / self.rho) * np.sign(self.Z)
+        self.Z = self.X + self.nu / self.rho - (self.alpha / self.rho) * np.sign(self.Z)
         # Combine
         self.nu = self.nu + self.rho * (self.X - self.Z)
 
@@ -74,17 +72,12 @@ class Lasso:
             p.join()
 
         self.X = np.average(self.XBar, axis=0)
-        self.nu = np.average(self.nuBar, axis=0)
 
         self.X = self.X.reshape(-1, 1)
         self.nu = self.nu.reshape(-1, 1)
 
         # Solve for Z_t+1
-        self.Z = self.X + self.nu / self.rho - \
-            (self.alpha / self.rho) * np.sign(self.Z)
-        # Combine
-        #Parallel(n_jobs = self.numberOfThreads, backend = "threading")(
-        #    delayed(self.combineSolution)(i) for i in range(0, self.N-1))
+        self.Z = self.X + self.nu / self.rho - (self.alpha / self.rho) * np.sign(self.Z)
 
         process = []
         for i in range(0, self.N-1):
@@ -94,6 +87,8 @@ class Lasso:
 
         for p in process:
             p.join()
+        
+        self.nu = np.average(self.nuBar, axis=0)
 
     def step_iterative(self):
         # Solve for X_t+1
@@ -102,20 +97,18 @@ class Lasso:
             self.XBar[i] = t.T
 
         self.X = np.average(self.XBar, axis=0)
-        self.nu = np.average(self.nuBar, axis=0)
+        # self.nu = np.average(self.nuBar, axis=0)
 
         self.X = self.X.reshape(-1, 1)
         self.nu = self.nu.reshape(-1, 1)
 
         # Solve for Z_t+1
-        self.Z = self.X + self.nu / self.rho - \
-            (self.alpha / self.rho) * np.sign(self.Z)
+        self.Z = self.X + self.nu / self.rho - (self.alpha / self.rho) * np.sign(self.Z)
 
         # Combine
         for i in range(0, self.N-1):
-            t = self.nuBar[i].reshape(-1, 1)
-            t = t + self.rho * (self.XBar[i].reshape(-1, 1) - self.Z)
-            self.nuBar[i] = t.T
+            self.nuBar[i] = self.combineSolution(i)
+        self.nu=np.average(self.nuBar,axis=0)
 
     def LassoObjective(self):
         return 0.5 * norm(self.A.dot(self.X) - self.b)**2 + self.alpha * norm(self.X, 1)

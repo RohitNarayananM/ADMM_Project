@@ -2,7 +2,6 @@ import numpy as np
 from sklearn.metrics import r2_score,mean_absolute_error,mean_squared_error
 import matplotlib.pyplot as plt
 import collections
-from preprocessing import heart_X_test, heart_X_train, heart_Y_test, heart_Y_train, student_X_test, student_X_train, student_Y_test, student_Y_train
 
 class Lasso:
     def __init__(self, regularizer_coef=50):
