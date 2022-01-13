@@ -11,7 +11,7 @@ t=time.time()
 Lasso.fit(heart_X_train, heart_Y_train)
 print(f"Time :{time.time()-t}")
 Lasso.predict(heart_X_test,heart_Y_test)
-Lasso.coef_values()
+# Lasso.coef_values()
 print("="*50)
 
 A = heart_X_train
@@ -28,7 +28,7 @@ t=time.time()
 Lasso.fit(student_X_train, student_Y_train)
 print(f"Time :{time.time()-t}")
 Lasso.predict(student_X_test, student_Y_test)
-Lasso.coef_values()
+# Lasso.coef_values()
 print("="*50)
 
 A=student_X_train
