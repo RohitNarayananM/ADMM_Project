@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.metrics import r2_score,mean_absolute_error,mean_squared_error
+from sklearn.metrics import r2_score,mean_absolute_error,mean_squared_error,accuracy_score
 from numpy.linalg import inv
 import matplotlib.pyplot as plt
 
@@ -24,21 +24,15 @@ class Ridge:
         self.intercept = betas[0]
 
 
-    def predict(self, test_X, test_y, print_score=True):
-        predict_y = np.matmul(test_X, self.coef)+self.intercept
-        if print_score:
-            print('Implemented R2 score: ', self.r2_score(test_y, predict_y))
-            print('ScikitLearn MAE: ', mean_absolute_error(test_y, predict_y))
-            print('ScikitLearn MSE: ', mean_squared_error(test_y, predict_y))
-        return r2_score(test_y, predict_y)
-
-    def r2_score(self, y_true, y_pred):
-        y_bar = np.mean(y_true)
-        SSR = np.sum((y_true-y_pred)**2)
-        SST = np.sum((y_true-y_bar)**2)
-        r2 = 1-(SSR/SST)
-        return r2
-
+    def predict(self,test_X,test_y,classification=False):
+        predict_y = np.matmul(test_X,self.coef)+self.intercept
+        if classification:
+            predict_y=predict_y > 0.5
+            print("Accuracy: ",accuracy_score(test_y,predict_y))
+        else:
+            print('Implemented R2 score: ',r2_score(test_y,predict_y))
+            print('ScikitLearn MAE: ',mean_absolute_error(test_y,predict_y))
+            print('ScikitLearn MSE: ',mean_squared_error(test_y,predict_y))
     def coef_values(self, save_name=None):
         coef_dict = {}
         for idx, coef_val in enumerate(self.coef):
