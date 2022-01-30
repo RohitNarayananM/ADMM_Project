@@ -4,7 +4,7 @@ from ridge_admm import Ridge as RidgeADMM
 import numpy as np
 import time
 
-Ridge = Ridge(75)
+Ridge = Ridge()
 
 print("Heart Patient dataset".center(50, "="))
 heart_X_train = np.array(heart_X_train)
@@ -13,7 +13,7 @@ t=time.time()
 Ridge.fit(heart_X_train, heart_Y_train)
 print(f"Time :{time.time()-t}")
 Ridge.predict(heart_X_test,heart_Y_test)
-# Ridge.coef_values()
+Ridge.coef_values()
 print("="*50)
 
 A = heart_X_train
@@ -33,7 +33,7 @@ t=time.time()
 Ridge.fit(student_X_train, student_Y_train)
 print(f"Time :{time.time()-t}")
 Ridge.predict(student_X_test,student_Y_test)
-# Ridge.coef_values()
+Ridge.coef_values()
 print("="*50)
 
 A=student_X_train

@@ -6,8 +6,8 @@ import pandas as pd
 import numpy as np
 
 
-heart_df = pd.read_csv('~/Amrita/ADMM_Project/datasets/heart.csv')
-student_df = pd.read_csv('~/Amrita/ADMM_Project/datasets/StudentsPerformance.csv')
+heart_df = pd.read_csv('../datasets/heart.csv')
+student_df = pd.read_csv('../datasets/StudentsPerformance.csv')
 
 #Making the data numeric
 
