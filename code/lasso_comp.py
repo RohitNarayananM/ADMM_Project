@@ -17,43 +17,13 @@ print("="*50)
 A = heart_X_train
 b = heart_Y_train
 b=b.reshape(b.shape[0],1)
-<<<<<<< HEAD
 admm = LassoADMM(A, b,False)
 t = time.time()
 for i in range(0, 20):
     admm.step()
 print(f"Time :{time.time()-t}")
-admm.predict(heart_X_test,heart_Y_test)
+admm.predict(heart_X_test,heart_Y_test,True)
 print("="*50)
-
-
-print("Student Prformance Dataset".center(50, "="))
-t=time.time()
-Lasso.fit(student_X_train, student_Y_train)
-print(f"Time :{time.time()-t}")
-Lasso.predict(student_X_test, student_Y_test)
-# Lasso.coef_values()
-print("="*50)
-
-A=student_X_train
-b=student_Y_train
-b=b.reshape(b.shape[0],1)
-admm = LassoADMM(A, b,False)
-t = time.time()
-=======
-admm = LassoADMM(A, b, False)
-arr1=[]
->>>>>>> 7b73efe (Added graphs)
-for i in range(0, 20):
-    t = time.time()
-    admm.step()
-<<<<<<< HEAD
-print(f"Time :{time.time()-t}")
-admm.predict(student_X_test,student_Y_test)
-=======
-    arr1.append((time.time()-t)*1000)
-print("Time :",sum(arr1)/1000)
-admm.predict(heart_X_test, heart_Y_test,True)
 
 print("Student Performance dataset".center(50, "="))
 t=time.time()
@@ -83,4 +53,3 @@ admm.predict(student_X_test,student_Y_test,False)
 # plt.ylabel("Time in milliseconds")
 # plt.legend(["Heart Patient dataset", "Student Performance dataset"])
 # plt.show()
->>>>>>> 7b73efe (Added graphs)
