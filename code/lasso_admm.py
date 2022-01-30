@@ -3,7 +3,7 @@ from numpy.linalg import inv
 from numpy.linalg import norm
 from joblib import Parallel, delayed
 from multiprocessing import Process, Manager, cpu_count, Pool
-from sklearn.metrics import r2_score,mean_absolute_error,mean_squared_error
+from sklearn.metrics import r2_score,mean_absolute_error,mean_squared_error,accuracy_score
 
 
 class SolveIndividual:
@@ -113,10 +113,12 @@ class Lasso:
     def LassoObjective(self):
         return 0.5 * norm(self.A.dot(self.X) - self.b)**2 + self.alpha * norm(self.X, 1)
     
-    def predict(self,test_X,test_y,print_score=True):
+    def predict(self,test_X,test_y,classification=False):
         predict_y = np.matmul(test_X,self.X)
-        if print_score:
+        if classification:
+            predict_y=predict_y > 0.5
+            print("Accuracy: ",accuracy_score(test_y,predict_y))
+        else:
             print('Implemented R2 score: ',r2_score(test_y,predict_y))
             print('ScikitLearn MAE: ',mean_absolute_error(test_y,predict_y))
             print('ScikitLearn MSE: ',mean_squared_error(test_y,predict_y))
-        return r2_score(test_y,predict_y)
