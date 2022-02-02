@@ -1,15 +1,12 @@
 from preprocessing import heart_X_test, heart_X_train, heart_Y_test, heart_Y_train, student_X_test, student_X_train, student_Y_test, student_Y_train
 from ridge import Ridge
 from ridge_admm import Ridge as RidgeADMM
-import numpy as np
 import time
 
 Ridge = Ridge(75)
-PARALLEL=True
+PARALLEL=False
 
 print("Heart Patient dataset".center(50, "="))
-heart_X_train = np.array(heart_X_train)
-heart_Y_train = np.array(heart_Y_train)
 t=time.time()
 Ridge.fit(heart_X_train, heart_Y_train)
 print(f"Time :{time.time()-t}")
@@ -21,7 +18,7 @@ b = heart_Y_train
 b = b.reshape(b.shape[0], 1)
 admm = RidgeADMM(A, b, PARALLEL)
 arr1=[]
-for i in range(0, 20):
+for i in range(0, 50):
     t = time.time()
     admm.step()
     arr1.append((time.time()-t)*1000)
@@ -29,8 +26,6 @@ print("Time :",sum(arr1)/1000)
 admm.predict(heart_X_test, heart_Y_test,True)
 
 print("Student Performance dataset".center(50, "="))
-student_X_train = np.array(student_X_test)
-student_Y_train = np.array(student_Y_test)
 t=time.time()
 Ridge.fit(student_X_train, student_Y_train)
 print(f"Time :{time.time()-t}")
@@ -42,7 +37,7 @@ b=student_Y_train
 b=b.reshape(b.shape[0],1)
 admm=RidgeADMM(A, b,PARALLEL)
 arr2=[]
-for i in range(0, 20):
+for i in range(0, 50):
     t = time.time()
     admm.step()
     arr2.append((time.time()-t)*1000)

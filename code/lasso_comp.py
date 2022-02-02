@@ -4,7 +4,7 @@ from lasso_admm import Lasso as LassoADMM
 import time
 
 Lasso = Lasso()
-PARALLEL=True
+PARALLEL=False
 
 print("Heart Patient dataset".center(50, "="))
 t=time.time()
@@ -18,7 +18,7 @@ b = heart_Y_train
 b=b.reshape(b.shape[0],1)
 admm = LassoADMM(A, b,PARALLEL)
 arr1=[]
-for i in range(0, 20):
+for i in range(0, 50):
     t = time.time()
     admm.step()
     arr1.append((time.time()-t)*1000)
@@ -37,7 +37,7 @@ b=student_Y_train
 b=b.reshape(b.shape[0],1)
 admm = LassoADMM(A, b,PARALLEL)
 arr2=[]
-for i in range(0, 20):
+for i in range(0, 50):
     t = time.time()
     admm.step()
     arr2.append((time.time()-t)*1000)

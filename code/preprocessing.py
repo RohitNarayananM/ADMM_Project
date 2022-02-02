@@ -1,4 +1,3 @@
-from sklearn.linear_model import LinearRegression as SKLinearRegression
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score
@@ -44,5 +43,4 @@ student_X_test = np.array(student_X_test)
 student_Y_test = np.array(student_Y_test)
 
 if __name__=="__main__":
-    print(student_X_train.shape, student_Y_train.shape,
-        student_X_test.shape, student_Y_test.shape)
+    print(student_X_train.shape, student_Y_train.shape,student_X_test.shape, student_Y_test.shape)
