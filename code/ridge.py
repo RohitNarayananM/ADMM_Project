@@ -2,7 +2,6 @@ import numpy as np
 from sklearn.metrics import r2_score,mean_absolute_error,mean_squared_error,accuracy_score
 from numpy.linalg import inv
 import matplotlib.pyplot as plt
-from preprocessing import heart_X_test, heart_X_train, heart_Y_test, heart_Y_train, student_X_test, student_X_train, student_Y_test, student_Y_train
 
 
 class Ridge:
@@ -19,11 +18,9 @@ class Ridge:
         self.estimate_coef()
 
     def estimate_coef(self):
-        betas = np.matmul(np.matmul(inv(np.matmul(self.train_X.T, self.train_X) +
-                          self.regularizer_coef*np.eye(self.D)), self.train_X.T), self.train_y)
+        betas = np.matmul(np.matmul(inv(np.matmul(self.train_X.T, self.train_X) + self.regularizer_coef*np.eye(self.D)), self.train_X.T), self.train_y)
         self.coef = betas[1:]
         self.intercept = betas[0]
-
 
     def predict(self,test_X,test_y,classification=False):
         predict_y = np.matmul(test_X,self.coef)+self.intercept

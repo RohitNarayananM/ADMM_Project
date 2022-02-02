@@ -1,9 +1,7 @@
 from preprocessing import heart_X_test, heart_X_train, heart_Y_test, heart_Y_train, student_X_test, student_X_train, student_Y_test, student_Y_train
 from lasso import Lasso
 from lasso_admm import Lasso as LassoADMM
-import numpy as np
 import time
-import matplotlib.pyplot as plt
 
 Lasso = Lasso()
 
@@ -18,12 +16,13 @@ A = heart_X_train
 b = heart_Y_train
 b=b.reshape(b.shape[0],1)
 admm = LassoADMM(A, b,False)
-t = time.time()
+arr1=[]
 for i in range(0, 20):
+    t = time.time()
     admm.step()
-print(f"Time :{time.time()-t}")
+    arr1.append((time.time()-t)*1000)
+print(f"Time :{sum(arr1)/1000}")
 admm.predict(heart_X_test,heart_Y_test,True)
-print("="*50)
 
 print("Student Performance dataset".center(50, "="))
 t=time.time()

@@ -3,7 +3,6 @@ from ridge import Ridge
 from ridge_admm import Ridge as RidgeADMM
 import numpy as np
 import time
-import matplotlib.pyplot as plt
 
 Ridge = Ridge(75)
 PARALLEL=False
@@ -20,13 +19,13 @@ print("="*50)
 A = heart_X_train
 b = heart_Y_train
 b = b.reshape(b.shape[0], 1)
-admm = RidgeADMM(A, b,PARALLEL)
+admm = RidgeADMM(A, b, PARALLEL)
 arr1=[]
 for i in range(0, 20):
     t = time.time()
     admm.step()
     arr1.append((time.time()-t)*1000)
-print("Time :",sum(arr1))
+print("Time :",sum(arr1)/1000)
 admm.predict(heart_X_test, heart_Y_test,True)
 
 print("Student Performance dataset".center(50, "="))
@@ -47,7 +46,7 @@ for i in range(0, 20):
     t = time.time()
     admm.step()
     arr2.append((time.time()-t)*1000)
-print("Time :",sum(arr2))
+print("Time :",sum(arr2)/1000)
 admm.predict(student_X_test,student_Y_test,False)
 
 # plt.plot(arr1)

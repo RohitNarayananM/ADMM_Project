@@ -1,4 +1,5 @@
 from lasso_comp import arr1, arr2
+print("Ridge".center(50, "="))
 from ridge_comp import arr1 as arr3
 from ridge_comp import arr2 as arr4
 import matplotlib.pyplot as plt
