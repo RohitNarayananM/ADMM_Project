@@ -39,7 +39,7 @@ class Ridge:
 
     def step(self):
         if self.parallel:
-            return self.step_parallel()
+            return self.step_iterative()
 
         # Solve for X_t+1
         self.X = inv(self.A.T.dot(self.A) + self.rho).dot(self.A.T.dot(self.b) + self.rho * self.Z - self.nu)
@@ -74,7 +74,7 @@ class Ridge:
         self.nu = self.nu.reshape(-1, 1)
 
         # Solve for Z_t+1
-        self.Z = self.X + self.nu / self.rho - (self.alpha / self.rho) * np.sign(self.Z)
+        self.Z = self.rho* self.X + self.nu / (2*self.alpha + self.rho)
 
         process = []
         for i in range(0, self.N-1):
@@ -84,6 +84,26 @@ class Ridge:
 
         for p in process:
             p.join()
+
+    def step_iterative(self):
+        # Solve for X_t+1
+        for i in range(0, self.N-1):
+            t = self.solveIndividual(i)
+            self.XBar[i] = t.T
+
+        self.X = np.average(self.XBar, axis=0)
+        # self.nu = np.average(self.nuBar, axis=0)
+
+        self.X = self.X.reshape(-1, 1)
+        self.nu = self.nu.reshape(-1, 1)
+
+        # Solve for Z_t+1
+        self.Z = self.rho* self.X + self.nu / (2*self.alpha + self.rho)
+
+        # Combine
+        for i in range(0, self.N-1):
+            self.nuBar[i] = self.combineSolution(i)
+        self.nu=np.average(self.nuBar,axis=0)
 
     def RidgeObjective(self):
         return 0.5 * norm(self.A.dot(self.X) - self.b)**2 + self.alpha * norm(self.X, 1)

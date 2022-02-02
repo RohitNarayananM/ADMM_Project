@@ -39,8 +39,8 @@ class Lasso:
         self.numberOfThreads = cpu_count()
 
     def step(self):
-        # if self.parallel:
-        #     return self.step_iterative()
+        if self.parallel:
+            return self.step_iterative()
 
         # Solve for X_t+1
         self.X = inv(self.A.T.dot(self.A) + self.rho).dot(self.A.T.dot(self.b) + self.rho * self.Z - self.nu)

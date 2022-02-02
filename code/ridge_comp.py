@@ -5,7 +5,7 @@ import numpy as np
 import time
 
 Ridge = Ridge(75)
-PARALLEL=False
+PARALLEL=True
 
 print("Heart Patient dataset".center(50, "="))
 heart_X_train = np.array(heart_X_train)

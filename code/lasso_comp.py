@@ -4,6 +4,7 @@ from lasso_admm import Lasso as LassoADMM
 import time
 
 Lasso = Lasso()
+PARALLEL=True
 
 print("Heart Patient dataset".center(50, "="))
 t=time.time()
@@ -15,7 +16,7 @@ print("="*50)
 A = heart_X_train
 b = heart_Y_train
 b=b.reshape(b.shape[0],1)
-admm = LassoADMM(A, b,False)
+admm = LassoADMM(A, b,PARALLEL)
 arr1=[]
 for i in range(0, 20):
     t = time.time()
@@ -34,7 +35,7 @@ print("="*50)
 A=student_X_train
 b=student_Y_train
 b=b.reshape(b.shape[0],1)
-admm = LassoADMM(A, b,False)
+admm = LassoADMM(A, b,PARALLEL)
 arr2=[]
 for i in range(0, 20):
     t = time.time()
