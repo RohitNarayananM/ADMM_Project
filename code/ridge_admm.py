@@ -57,7 +57,6 @@ class Ridge:
         return combine.combine(self.nuBar[i].reshape(-1, 1), self.XBar[i].reshape(-1, 1), self.Z, self.rho)
 
     def step_parallel(self):
-
         temp=Parallel(n_jobs = self.numberOfThreads, backend = "threading")(delayed(self.solveIndividual)(i) for i in range(0, self.N-1))
 
         self.X = np.average(temp, axis=0)

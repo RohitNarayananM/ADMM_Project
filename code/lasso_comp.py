@@ -4,7 +4,7 @@ from lasso_admm import Lasso as LassoADMM
 import time
 
 Lasso = Lasso()
-PARALLEL=False
+PARALLEL=True
 
 print("Heart Patient dataset".center(50, "="))
 t=time.time()
