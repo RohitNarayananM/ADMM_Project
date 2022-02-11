@@ -18,9 +18,12 @@ b = heart_Y_train
 b=b.reshape(b.shape[0],1)
 admm = LassoADMM(A, b,PARALLEL)
 arr1=[]
+obj=admm.LassoObjective()
 for i in range(0, 50):
     t = time.time()
     admm.step()
+    if(abs(obj-admm.LassoObjective())<0.001):
+        break
     arr1.append((time.time()-t)*1000)
 print(f"Time :{sum(arr1)/1000}")
 admm.predict(heart_X_test,heart_Y_test,True)
@@ -37,9 +40,12 @@ b=student_Y_train
 b=b.reshape(b.shape[0],1)
 admm = LassoADMM(A, b,PARALLEL)
 arr2=[]
+obj=admm.LassoObjective()
 for i in range(0, 50):
     t = time.time()
     admm.step()
+    if(abs(obj-admm.LassoObjective())<0.001):
+        break
     arr2.append((time.time()-t)*1000)
 print("Time :",sum(arr2)/1000)
 admm.predict(student_X_test,student_Y_test,False)

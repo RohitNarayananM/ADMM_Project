@@ -1,7 +1,9 @@
 import numpy as np
+from os import getpid
 from numpy.linalg import inv
 from numpy.linalg import norm
 from multiprocessing import Process, cpu_count
+from joblib import Parallel, delayed
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error,accuracy_score
 
 
@@ -11,7 +13,6 @@ class SolveIndividual:
         A = A.reshape(-1, 1)
         tX = (A * b + rho * Z - nu) / (t1 + rho)
         return tX
-
 
 class CombineSolution:
     def combine(self, nuBar, xBar, Z, rho):
@@ -35,75 +36,52 @@ class Ridge:
         self.b = b
         self.alpha = 0.01
         self.parallel = parallel
-        self.numberOfThreads = cpu_count()
+        self.numberOfThreads = 32
 
     def step(self):
         if self.parallel:
-            return self.step_iterative()
+            return self.step_parallel()
 
-        # Solve for X_t+1
         self.X = inv(self.A.T.dot(self.A) + self.rho).dot(self.A.T.dot(self.b) + self.rho * self.Z - self.nu)
 
-        # Solve for Z_t+1
         self.Z = self.rho* self.X + self.nu / (2*self.alpha + self.rho)
-        # Combine
         self.nu = self.nu + self.rho * (self.X - self.Z)
 
     def solveIndividual(self, i):
         solve = SolveIndividual()
-        return solve.solve(self.A[i], np.asscalar(self.b[i]), self.nuBar[i].reshape(-1, 1), self.rho, self.Z)
+        t = solve.solve(self.A[i], np.asscalar(self.b[i]), self.nuBar[i].reshape(-1, 1), self.rho, self.Z)
+        return t.T
 
     def combineSolution(self, i):
         combine = CombineSolution()
         return combine.combine(self.nuBar[i].reshape(-1, 1), self.XBar[i].reshape(-1, 1), self.Z, self.rho)
 
     def step_parallel(self):
-        process = []
-        for i in range(0, self.N-1):
-            p = Process(target=self.solveIndividual, args=(i,))
-            p.start()
-            process.append(p)
 
-        for p in process:
-            p.join()
+        temp=Parallel(n_jobs = self.numberOfThreads, backend = "threading")(delayed(self.solveIndividual)(i) for i in range(0, self.N-1))
 
-        self.X = np.average(self.XBar, axis=0)
-        self.nu = np.average(self.nuBar, axis=0)
-
+        self.X = np.average(temp, axis=0)
         self.X = self.X.reshape(-1, 1)
         self.nu = self.nu.reshape(-1, 1)
-
-        # Solve for Z_t+1
         self.Z = self.rho* self.X + self.nu / (2*self.alpha + self.rho)
 
-        process = []
-        for i in range(0, self.N-1):
-            p = Process(target=self.combineSolution, args=(i,))
-            p.start()
-            process.append(p)
-
-        for p in process:
-            p.join()
+        temp=Parallel(n_jobs = self.numberOfThreads, backend = "threading")(delayed(self.combineSolution)(i) for i in range(0, self.N-1))
+        self.nu=np.average(temp,axis=0)
 
     def step_iterative(self):
-        # Solve for X_t+1
+        temp=self.XBar
         for i in range(0, self.N-1):
-            t = self.solveIndividual(i)
-            self.XBar[i] = t.T
+            self.solveIndividual(i,temp)
 
-        self.X = np.average(self.XBar, axis=0)
-        # self.nu = np.average(self.nuBar, axis=0)
-
+        self.X = np.average(temp, axis=0)
         self.X = self.X.reshape(-1, 1)
         self.nu = self.nu.reshape(-1, 1)
-
-        # Solve for Z_t+1
         self.Z = self.rho* self.X + self.nu / (2*self.alpha + self.rho)
 
-        # Combine
+        temp=self.nuBar
         for i in range(0, self.N-1):
-            self.nuBar[i] = self.combineSolution(i)
-        self.nu=np.average(self.nuBar,axis=0)
+            self.combineSolution(i,temp)
+        self.nu=np.average(temp,axis=0)
 
     def RidgeObjective(self):
         return 0.5 * norm(self.A.dot(self.X) - self.b)**2 + self.alpha * norm(self.X, 1)
@@ -112,8 +90,6 @@ class Ridge:
         predict_y = np.matmul(test_X,self.X)
         if classification:
             predict_y=predict_y > 0.5
-            print("Accuracy: ",accuracy_score(test_y,predict_y))
-        else:
-            print('Implemented R2 score: ',r2_score(test_y,predict_y))
-            print('ScikitLearn MAE: ',mean_absolute_error(test_y,predict_y))
-            print('ScikitLearn MSE: ',mean_squared_error(test_y,predict_y))
+        print('Implemented R2 score: ',r2_score(test_y,predict_y))
+        print('ScikitLearn MAE: ',mean_absolute_error(test_y,predict_y))
+        print('ScikitLearn MSE: ',mean_squared_error(test_y,predict_y))
