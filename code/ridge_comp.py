@@ -1,4 +1,4 @@
-from preprocessing import heart_X_test, heart_X_train, heart_Y_test, heart_Y_train, student_X_test, student_X_train, student_Y_test, student_Y_train
+from preprocessing import student_X_test, student_X_train, student_Y_test, student_Y_train, pollution_X_test, pollution_X_train, pollution_Y_test, pollution_Y_train
 from ridge import Ridge
 from ridge_admm import Ridge as RidgeADMM
 import time
@@ -6,15 +6,15 @@ import time
 Ridge = Ridge(75)
 PARALLEL=True
 
-print("Heart Patient dataset".center(50, "="))
+print("Pollution dataset".center(50, "="))
 t=time.time()
-Ridge.fit(heart_X_train, heart_Y_train)
+Ridge.fit(pollution_X_train, pollution_Y_train)
 print(f"Time :{time.time()-t}")
-Ridge.predict(heart_X_test,heart_Y_test,True)
+Ridge.predict(pollution_X_test,pollution_Y_test)
 print("="*50)
 
-A = heart_X_train
-b = heart_Y_train
+A = pollution_X_train
+b = pollution_Y_train
 b = b.reshape(b.shape[0], 1)
 admm = RidgeADMM(A, b, PARALLEL)
 arr1=[]
@@ -25,14 +25,14 @@ for i in range(0, 50):
     if(abs(obj-admm.RidgeObjective())<0.001):
         break
     arr1.append((time.time()-t)*1000)
-print("Time :",sum(arr1)/1000)
-admm.predict(heart_X_test, heart_Y_test,True)
+print("{i}Time :",sum(arr1)/1000)
+admm.predict(pollution_X_test, pollution_Y_test)
 
 print("Student Performance dataset".center(50, "="))
 t=time.time()
 Ridge.fit(student_X_train, student_Y_train)
 print(f"Time :{time.time()-t}")
-Ridge.predict(student_X_test,student_Y_test,False)
+Ridge.predict(student_X_test,student_Y_test)
 print("="*50)
 
 A=student_X_train
@@ -48,14 +48,4 @@ for i in range(0, 50):
         break
     arr2.append((time.time()-t)*1000)
 print("Time :",sum(arr2)/1000)
-admm.predict(student_X_test,student_Y_test,False)
-
-# plt.plot(arr1)
-# plt.plot(arr2)
-# plt.plot(arr1, ls="", marker="o")
-# plt.plot(arr2, ls="", marker="o")
-# plt.title("Time of each iteration Ridge")
-# plt.xlabel("Iteration")
-# plt.ylabel("Time in milliseconds")
-# plt.legend(["Heart Patient dataset", "Student Performance dataset"])
-# plt.show()
+admm.predict(student_X_test,student_Y_test)

@@ -1,10 +1,9 @@
 import numpy as np
-from os import getpid
 from numpy.linalg import inv
 from numpy.linalg import norm
-from multiprocessing import Process, cpu_count
+from multiprocessing import cpu_count
 from joblib import Parallel, delayed
-from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error,accuracy_score
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
 
 class SolveIndividual:
@@ -36,7 +35,7 @@ class Ridge:
         self.b = b
         self.alpha = 0.01
         self.parallel = parallel
-        self.numberOfThreads = 32
+        self.numberOfThreads = cpu_count()
 
     def step(self):
         if self.parallel:
@@ -68,27 +67,23 @@ class Ridge:
         self.nu=np.average(temp,axis=0)
 
     def step_iterative(self):
-        temp=self.XBar
         for i in range(0, self.N-1):
-            self.solveIndividual(i,temp)
+            self.XBar[i]=self.solveIndividual(i)
 
-        self.X = np.average(temp, axis=0)
+        self.X = np.average(self.XBar, axis=0)
         self.X = self.X.reshape(-1, 1)
         self.nu = self.nu.reshape(-1, 1)
         self.Z = self.rho* self.X + self.nu / (2*self.alpha + self.rho)
 
-        temp=self.nuBar
         for i in range(0, self.N-1):
-            self.combineSolution(i,temp)
-        self.nu=np.average(temp,axis=0)
+            self.nuBar[i]=self.combineSolution(i)
+        self.nu=np.average(self.nuBar,axis=0)
 
     def RidgeObjective(self):
         return 0.5 * norm(self.A.dot(self.X) - self.b)**2 + self.alpha * norm(self.X, 1)
 
-    def predict(self,test_X,test_y,classification=False):
+    def predict(self,test_X,test_y):
         predict_y = np.matmul(test_X,self.X)
-        if classification:
-            predict_y=predict_y > 0.5
         print('Implemented R2 score: ',r2_score(test_y,predict_y))
         print('ScikitLearn MAE: ',mean_absolute_error(test_y,predict_y))
         print('ScikitLearn MSE: ',mean_squared_error(test_y,predict_y))

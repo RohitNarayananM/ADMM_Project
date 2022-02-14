@@ -1,7 +1,5 @@
 import numpy as np
-from sklearn.metrics import r2_score,mean_absolute_error,mean_squared_error,accuracy_score
-import matplotlib.pyplot as plt
-import collections
+from sklearn.metrics import r2_score,mean_absolute_error,mean_squared_error
 
 class Lasso:
     def __init__(self, regularizer_coef=50):
@@ -38,10 +36,8 @@ class Lasso:
         self.coef = self.betas[1:]
         self.intercept = self.betas[0]
 
-    def predict(self,test_X,test_y,classification=False):
+    def predict(self,test_X,test_y):
         predict_y = np.matmul(test_X,self.coef)
-        if classification:
-            predict_y=predict_y > 0.5
         print('Implemented R2 score: ',r2_score(test_y,predict_y))
         print('ScikitLearn MAE: ',mean_absolute_error(test_y,predict_y))
         print('ScikitLearn MSE: ',mean_squared_error(test_y,predict_y))
