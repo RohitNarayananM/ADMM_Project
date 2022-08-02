@@ -1,4 +1,4 @@
-# ADMM Project
+# Regression using ADMM
 Implementing ADMM for solving convex optimization problems such as Lasso, Ridge regression
 
 ## Introduction
