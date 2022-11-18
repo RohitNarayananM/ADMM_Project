@@ -1,92 +1,95 @@
 import numpy as np
-from numpy.linalg import inv
+from numpy import linalg as la
 from numpy.linalg import norm
-from joblib import Parallel, delayed
-from multiprocessing import cpu_count
-from sklearn.metrics import r2_score,mean_absolute_error,mean_squared_error,accuracy_score
+import time as t
+from History import History
+import math
+from scipy import sparse
+
+def objective(A, b, lamda, x, z):
+    a = np.dot(A, x) - b
+    p = 1/2*((la.norm(a, 2))**2) + lamda*la.norm(z, 1)
+    return p
+
+def shrinkage(x, kappa):
+    z = np.maximum(0, (x - kappa).getA()) - np.maximum(0, (-x - kappa).getA())
+    return z
+
+def factor(A, rho):
+    m, n = A.shape
+    if m >= n:
+        L = la.cholesky(np.dot(A.T, A) + rho*sparse.eye(n))
+    else:
+        L = la.cholesky(sparse.eye(m) + 1/rho*(np.dot(A, A.T)))
+
+    L = sparse.coo_matrix(L)
+    U = sparse.coo_matrix(L.T)
+
+    return L, U
 
 
-class SolveIndividual:
-    def solve(self, A, b, nu, rho, Z):
-        t1 = A.T.dot(A)
-        A = A.reshape(-1, 1)
-        tX = (A * b + rho * Z - nu) / (t1 + rho)
-        return tX
+def lasso(A, b, lamda, rho, alpha):
+    MAX_ITER = 100
+    ABSTOL = 10**(-4)
+    RELTOL = 10**(-2)
 
+    m, n = A.shape
+    # save a matrix-vector multiply
+    Atb = A.T*b
+    # ADMM solver
+    x = np.zeros([n, 1])
+    z = np.zeros([n, 1])
+    u = np.zeros([n, 1])
 
-class CombineSolution:
-    def combine(self, nuBar, xBar, Z, rho):
-        t = nuBar.reshape(-1, 1)
-        t = t + rho * (xBar.reshape(-1, 1) - Z)
-        return t.T
+    h = {}
+    h['objval']     = np.zeros(MAX_ITER)
+    h['r_norm']     = np.zeros(MAX_ITER)
+    h['s_norm']     = np.zeros(MAX_ITER)
+    h['eps_pri']    = np.zeros(MAX_ITER)
+    h['eps_dual']   = np.zeros(MAX_ITER)
+    h['x'] = np.zeros(MAX_ITER)
 
-
-class Lasso:
-    def __init__(self, A, b, parallel=False):
-        self.D = A.shape[1]
-        self.N = A.shape[0]
-        if parallel:
-            self.XBar = np.zeros((self.N, self.D))
-            self.nuBar = np.zeros((self.N, self.D))
-        self.nu = np.zeros((self.D, 1))
-        self.rho = 1
-        self.X = np.random.randn(self.D, 1)
-        self.Z = np.zeros((self.D, 1))
-        self.A = A
-        self.b = b
-        self.alpha = 0.01
-        self.parallel = parallel
-        self.numberOfThreads = cpu_count()
-
-    def step(self):
-        if self.parallel:
-            return self.step_parallel()
-
-        self.X = inv(self.A.T.dot(self.A) + self.rho).dot(self.A.T.dot(self.b) + self.rho * self.Z - self.nu)
-
-        self.Z = self.X + self.nu / self.rho - (self.alpha / self.rho) * np.sign(self.Z)
-        self.nu = self.nu + self.rho * (self.X - self.Z)
-
-    def solveIndividual(self, i):
-        solve = SolveIndividual()
-        return solve.solve(self.A[i], np.asscalar(self.b[i]), self.nuBar[i].reshape(-1, 1), self.rho, self.Z)
-
-    def combineSolution(self, i):
-        combine = CombineSolution()
-        return combine.combine(self.nuBar[i].reshape(-1, 1), self.XBar[i].reshape(-1, 1), self.Z, self.rho)
-
-    def step_parallel(self):
-        temp=Parallel(n_jobs = self.numberOfThreads, backend = "threading")(delayed(self.solveIndividual)(i) for i in range(0, self.N-1))
-
-        self.X = np.average(temp, axis=0)
-        self.X = self.X.reshape(-1, 1)
-        self.nu = self.nu.reshape(-1, 1)
-        self.Z = self.X + self.nu / self.rho - (self.alpha / self.rho) * np.sign(self.Z)
-
-        temp=Parallel(n_jobs = self.numberOfThreads, backend = "threading")(delayed(self.combineSolution)(i) for i in range(0, self.N-1))
-        self.nu=np.average(temp,axis=0)
-
-    def step_iterative(self):
-        for i in range(0, self.N-1):
-            t = self.solveIndividual(i)
-            self.XBar[i] = t.T
-
-        self.X = np.average(self.XBar, axis=0)
-
-        self.X = self.X.reshape(-1, 1)
-        self.nu = self.nu.reshape(-1, 1)
-
-        self.Z = self.X + self.nu / self.rho - (self.alpha / self.rho) * np.sign(self.Z)
-
-        for i in range(0, self.N-1):
-            self.nuBar[i] = self.combineSolution(i)
-        self.nu=np.average(self.nuBar,axis=0)
-
-    def LassoObjective(self):
-        return 0.5 * norm(self.A.dot(self.X) - self.b)**2 + self.alpha * norm(self.X, 1)
+    # cache the factorization
+    L, U = factor(A, rho)
+    #decomposing the (AT.A - rho*I) into L,U  
     
-    def predict(self,test_X,test_y):
-        predict_y = np.matmul(test_X,self.X)
-        print('Implemented R2 score: ',r2_score(test_y,predict_y))
-        print('ScikitLearn MAE: ',mean_absolute_error(test_y,predict_y))
-        print('ScikitLearn MSE: ',mean_squared_error(test_y,predict_y))
+    history = History()
+    for k in range(0, MAX_ITER):
+        # x-update
+        start_time = t.time()
+        q = Atb + rho*(z) - (u/rho)  # temporary value
+        #as x - update is xk = (AT.A - rho*I)^(-1)*(AT*b+rho*z-u/rho)
+        if m >= n:
+            x = la.solve(U.todense(), la.solve(L.todense(), q))
+        else:
+            x = q/rho - np.dot(A.T, la.solve(U.todense(), la.solve(L.todense(), np.dot(A, q))))/rho**2
+        ##print(x,z)
+        # z-update
+        zold = z
+        x_hat = x #alpha*x + (1 - alpha)*zold
+        z = shrinkage(x_hat + u/rho, lamda/rho)
+        #print(z,zold,lamda)
+        #print(z)
+        # u-update
+        u = u + rho*(x_hat - z)
+        time= t.time() - start_time
+        # diagnostics, reporting, termination checks
+        history.addObjval(objective(A, b, lamda, x, z))
+        h['objval'][k] = objective(A, b, lamda, x, z)
+        history.addR_norm(la.norm(x - z))
+        h['r_norm'][k]   = norm(x-z)
+        history.addS_norm(la.norm(-rho*(z-zold)))
+        h['s_norm'][k]   = norm(-rho*(z-zold))
+        history.addEps_pri(np.sqrt(n)*ABSTOL + RELTOL*np.maximum(la.norm(x), la.norm(-z)))
+        h['eps_pri'][k]  = np.sqrt(n)*ABSTOL+ RELTOL*np.maximum(norm(x),norm(-z))
+        history.addEps_dual(np.sqrt(n)*ABSTOL + RELTOL*la.norm(rho*u))
+        h['eps_dual'][k] = np.sqrt(n)*ABSTOL+ RELTOL*norm(rho*u)
+        history.addtime_iter(time)
+
+        if history.getR_norm()[k] < history.getEps_pri()[k] and history.getS_norm()[k]<history.getEps_dual()[k]:
+            break
+    time = list(history.gettime_iter())
+    time_iter = time.copy()
+    time_iter.sort(reverse=True)
+    history.settime_iter(time_iter)
+    return x.ravel(), history ,h

@@ -1,28 +1,73 @@
 import numpy as np
-from sklearn.metrics import r2_score,mean_absolute_error,mean_squared_error
-from numpy.linalg import inv
+from numpy import linalg as la
+import time as t
 
+class RidgeRegression() :
+      
+    def __init__( self, learning_rate, iterations, l2_penality ) :
+          
+        self.learning_rate = learning_rate        
+        self.iterations = iterations        
+        self.l2_penality = l2_penality
+        self.timeiter = [] 
+        self.objvals = []
+    # Function for model training            
+    def fit( self, X, Y ) :
+          
+        # no_of_training_examples, no_of_features        
+        self.m, self.n = X.shape
+          
+        # weight initialization        
+        self.W = np.zeros( self.n )
+          
+        self.b = 0        
+        self.X = X        
+        self.Y = Y
+          
+        # gradient descent learning
+                  
+        for i in range( self.iterations ) :
+            Y_pred = self.predict( self.X )
+            hh = self.objval(Y,Y_pred,X)
+            
+            start = t.time()            
+            self.update_weights()
+            end = t.time() - start
+            self.timeiter.append(end)
+            Y_pred = self.predict( self.X )
+            hj = self.objval(Y,Y_pred,X)
+            self.objvals.append(hh)
+            if(abs(hh-hj)<=0.0001e-05):
+              break
 
-class Ridge:
-    def __init__(self, regularizer_coef=75):
-        self.regularizer_coef = regularizer_coef
-
-    def fit(self, train_X, train_y):
-        assert isinstance(train_X, (np.ndarray)) == True
-        assert isinstance(train_y, (np.ndarray)) == True
-        train_X = np.insert(train_X, 0, np.ones((train_X.shape[0])), axis=1)
-        self.train_X = train_X
-        self.train_y = train_y
-        self.N, self.D = train_X.shape
-        self.estimate_coef()
-
-    def estimate_coef(self):
-        betas = np.matmul(np.matmul(inv(np.matmul(self.train_X.T, self.train_X) + self.regularizer_coef*np.eye(self.D)), self.train_X.T), self.train_y)
-        self.coef = betas[1:]
-        self.intercept = betas[0]
-
-    def predict(self,test_X,test_y):
-        predict_y = np.matmul(test_X,self.coef)
-        print('Implemented R2 score: ',r2_score(test_y,predict_y))
-        print('ScikitLearn MAE: ',mean_absolute_error(test_y,predict_y))
-        print('ScikitLearn MSE: ',mean_squared_error(test_y,predict_y))
+        time_g1 = (self.timeiter)
+        time_iterg1 = time_g1.copy()
+        time_iterg1.sort(reverse=True)
+        self.timeiter = time_iterg1
+        return self
+      
+    # Helper function to update weights in gradient descent
+      
+    def update_weights( self ) :           
+        Y_pred = self.predict( self.X )
+          
+        # calculate gradients      
+        dW = ( - ( 2 * ( self.X.T ).dot( self.Y - Y_pred ) ) +               
+               ( 2 * self.l2_penality * self.W ) ) / self.m     
+        db = - 2 * np.sum( self.Y - Y_pred ) / self.m 
+          
+        # update weights    
+        self.W = self.W - self.learning_rate * dW    
+        self.b = self.b - self.learning_rate * db        
+        return self
+      
+    # Hypothetical function  h( x ) 
+    def predict( self, X ) :    
+        return X.dot( self.W ) + self.b
+    
+    def objval(self ,Y,pred,X):
+      h_1 = sum( (Y - pred )**2)
+      h_2 = la.norm( self.W,2 )**2
+      h_3 = self.l2_penality*h_2
+      h = h_3/self.m
+      return h
