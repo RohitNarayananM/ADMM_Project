@@ -39,28 +39,28 @@ def compare_ridge(x_tr,x_te,y_tr,y_te):
     for i in range(len(factors)):
         coef.append((factors[i],round(float(x.T[i][0]),4)))
 
+    K = len(history.gettime_iter())
+    x = np.arange(K)
+    plt.plot(x, history.getObjval())
+    plt.xlabel('iter (k)')
+    plt.ylabel('f(x^k) + g(z^k)')
+    plt.savefig('../images/Ridge_ADMM_iter_VS_f(x^k)_g(z^k).png')
     if PLOT:
-        K = len(history.gettime_iter())
-        x = np.arange(K)
-        plt.plot(x, history.gettime_iter())
-        plt.xlabel('iter (k)')
-        plt.ylabel('time for each iteration')
         plt.show()
+    plt.clf()
 
-        plt.plot(x, history.getObjval())
-        plt.xlabel('iter (k)')
-        plt.ylabel('f(x^k) + g(z^k)')
+    plt.subplot(211)
+    plt.plot(x, np.maximum(10**(-8), history.getR_norm()), '-', history.getEps_pri(), '--')
+    plt.ylabel('||r||_2')
+
+    plt.subplot(212)
+    plt.plot(x, np.maximum(10**(-8), history.getS_norm()), '-', history.getEps_dual(), '--')
+    plt.xlabel('iter (k)')
+    plt.ylabel('||s||_2')
+    plt.savefig('../images/Ridge_ADMM_rnorm_VS_snorm.png')
+    if PLOT:
         plt.show()
-
-        plt.subplot(211)
-        plt.plot(x, np.maximum(10**(-8), history.getR_norm()), '-', history.getEps_pri(), '--')
-        plt.ylabel('||r||_2')
-
-        plt.subplot(212)
-        plt.plot(x, np.maximum(10**(-8), history.getS_norm()), '-', history.getEps_dual(), '--')
-        plt.xlabel('iter (k)')
-        plt.ylabel('||s||_2')
-        plt.show()
+    plt.clf()
 
     # model evaluation (MSE,R2,std_error)
     mse_predict = mean_squared_error(y_test,y_test_predict)
@@ -87,16 +87,24 @@ def compare_ridge(x_tr,x_te,y_tr,y_te):
 
     K = len(model.timeiter)
     x_vals = np.arange(K)
+    
+    plt.plot(x_vals, model.timeiter,label='Ridge Gradient Descent')
+    plt.xlabel('iter (k)')
+    plt.ylabel('time for each iteration')
+    plt.plot(x, history.gettime_iter(),label='Ridge ADMM')
+    plt.legend()
+    plt.savefig('../images/Ridge_ADMM_VS_Ridge_GD_time_for_iter.png')
     if PLOT:
-        plt.plot(x_vals, model.timeiter)
-        plt.xlabel('iter (k)')
-        plt.ylabel('time for each iteration')
         plt.show()
+    plt.clf()
         
-        plt.plot(x_vals, model.objvals)
-        plt.xlabel('iter (k)')
-        plt.ylabel('objective vals')
+    plt.plot(x_vals, model.objvals)
+    plt.xlabel('iter (k)')
+    plt.ylabel('objective vals')
+    plt.savefig('../images/Ridge_iter_VS_objective.png')
+    if PLOT:
         plt.show()
+    plt.clf()
 
     # model evaluation (MSE,R2,std_error)
     y_pred=np.nan_to_num(y_pred)
@@ -112,3 +120,5 @@ def compare_ridge(x_tr,x_te,y_tr,y_te):
     for k in range(len(model.timeiter)):
         runtime += model.timeiter[k]
     print(round(runtime,5))
+    
+    return x,history.gettime_iter(),model.timeiter
