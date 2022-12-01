@@ -5,15 +5,14 @@ Implementing ADMM for solving convex optimization problems such as Lasso, Ridge 
 ADMM works in two steps
   1. Divide <br> 
     a. Break down original problem into small problems <br>
-    b. Distribute these small problem to <N> processors / computing resources <br>
+    b. Distribute these small problem to \<N\> processors / computing resources <br>
     c. Every processor solves the smaller problem
   2. Conquer <br>
     a. Combine solution from \<N\> processors into one
   
-## Datasets 
-  We have used two datsets namely,
-    1. Student Performance Dataset(https://www.kaggle.com/spscientist/students-performance-in-exams) <br>
-    2. Heart Disease Dataset(https://www.kaggle.com/spscientist/students-performance-in-exams)
+## Dataset 
+  We are using the Fraud detection dataset from Kaggle for comparing the models.
+  [Fraud Detection Dataset](https://www.kaggle.com/datasets/ealaxi/paysim1)
   
 ## Our work
   We implemented ADMM based and regular Lasso and Ridge regression models using python.
